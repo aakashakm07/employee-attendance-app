@@ -229,7 +229,7 @@ export default function EmployeeManagement() {
           </DialogHeader>
               
           <AddEmployeeForm
-            onAdd={(emp:any) => {
+            onAdd={(emp) => {
               setEmployees((prev) => [...prev, emp]);
               setOpenAdd(false);
             }}
