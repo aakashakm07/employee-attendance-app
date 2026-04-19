@@ -1,8 +1,12 @@
-export default function Attendence(){
-    return (
-        <div>
-            <h2>Showing Attendence Records</h2>
-        </div>
+"use client";
 
-    )
+import dynamic from "next/dynamic";
+
+const Employee = dynamic(
+  () => import("@/components/Employee"),
+  { ssr: false } // 🔥 main fix
+);
+
+export default function Attendence() {
+  return <Employee />;
 }

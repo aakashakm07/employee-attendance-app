@@ -1,5 +1,11 @@
+import ProjectsHistory from "@/components/Projects";
+
+
+
 export default function Projects(){
     return (
-        <h1>Projects Page</h1>
+        <div>
+        <ProjectsHistory/>
+        </div>
     )
 }
