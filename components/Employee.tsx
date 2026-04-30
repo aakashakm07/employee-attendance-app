@@ -17,7 +17,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@radix-ui/react-select";
 
 const role: "admin" | "supervisor" = "admin";
 
@@ -26,14 +26,28 @@ const jobRates: Record<"mistree" | "labour", number> = {
   labour: 500,
 };
 
+// ✅ Employee Type
+export type Employee = {
+  id: string;
+  name: string;
+  contact: string;
+  site: string;
+  job: "mistree" | "labour";
+  salary: number;
+};
 
-function AddEmployeeForm({ onAdd }: any) {
+// ✅ Props Type
+type AddEmployeeProps = {
+  onAdd: (emp: Employee) => void;
+};
+
+function AddEmployeeForm({ onAdd }: AddEmployeeProps) {
   const [form, setForm] = useState({
     id: Date.now().toString(),
     name: "",
     contact: "",
     site: "",
-    job: "mistree",
+    job: "mistree" as "mistree" | "labour",
     salary: "",
   });
 
@@ -45,7 +59,7 @@ function AddEmployeeForm({ onAdd }: any) {
 
       <Input placeholder="Site Name" value={form.site} onChange={(e) => setForm({ ...form, site: e.target.value })} />
 
-      <Select value={form.job} onValueChange={(val) => setForm({ ...form, job: val })}>
+      <Select value={form.job} onValueChange={(val) => setForm({ ...form, job: val as "mistree" | "labour" })}>
         <SelectTrigger>
           <SelectValue />
         </SelectTrigger>
@@ -59,7 +73,15 @@ function AddEmployeeForm({ onAdd }: any) {
 
       <Button
         onClick={() => {
-          onAdd({ ...form, salary: Number(form.salary) || 0 });
+          onAdd({
+            id: form.id,
+            name: form.name,
+            contact: form.contact,
+            site: form.site,
+            job: form.job,
+            salary: Number(form.salary) || 0,
+          });
+
           setForm({ id: Date.now().toString(), name: "", contact: "", site: "", job: "mistree", salary: "" });
         }}
       >
@@ -74,7 +96,7 @@ export default function EmployeeManagement() {
   const [openEdit, setOpenEdit] = useState(false);
   const [openAttendance, setOpenAttendance] = useState(false);
 
-  const [selectedEmpData, setSelectedEmpData] = useState<any>(null);
+  const [selectedEmpData, setSelectedEmpData] = useState<Employee | null>(null);
 
   const [search, setSearch] = useState("");
   const [siteFilter, setSiteFilter] = useState("ALL");
@@ -85,12 +107,11 @@ export default function EmployeeManagement() {
 
   const [bulkAttendance, setBulkAttendance] = useState<Record<string, boolean>>({});
 
-  const [employees, setEmployees] = useState([
+  const [employees, setEmployees] = useState<Employee[]>([
     { id: "1", name: "Ramesh Kumar", contact: "9876543210", site: "Site A", job: "mistree", salary: 800 },
     { id: "2", name: "Suresh Yadav", contact: "9123456780", site: "Site B", job: "labour", salary: 500 },
   ]);
 
-  // ✅ Dynamic Sites List
   const sites = useMemo(() => {
     const unique = new Set(employees.map((e) => e.site));
     return ["ALL", ...Array.from(unique)];
@@ -104,7 +125,6 @@ export default function EmployeeManagement() {
     );
   }, [search, siteFilter, employees]);
 
-  // ✅ Delete Handler
   const handleDelete = (id: string) => {
     setEmployees((prev) => prev.filter((emp) => emp.id !== id));
   };
@@ -112,14 +132,12 @@ export default function EmployeeManagement() {
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow">
 
-      {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <h2 className="text-lg font-semibold">Employee Records</h2>
 
         <div className="flex items-center gap-3">
           <Input placeholder="Search employee" className="w-48" value={search} onChange={(e) => setSearch(e.target.value)} />
 
-          {/* ✅ Dynamic Site Filter */}
           <Select value={siteFilter} onValueChange={setSiteFilter}>
             <SelectTrigger className="w-40">
               <SelectValue placeholder="All Sites" />
@@ -159,7 +177,6 @@ export default function EmployeeManagement() {
         </div>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 dark:bg-zinc-800">
@@ -178,8 +195,7 @@ export default function EmployeeManagement() {
           <tbody>
             {filteredEmployees.map((emp) => {
               const status = attendance[emp.id]?.[selectedDate];
-              const perDay = emp.salary ?? jobRates[emp.job as "mistree" | "labour"];
-
+              const perDay = emp.salary ?? jobRates[emp.job];
               const salary = status ? perDay : 0;
 
               return (
@@ -221,15 +237,14 @@ export default function EmployeeManagement() {
         </table>
       </div>
 
-      {/* Add Employee Modal */}
       <Dialog open={openAdd} onOpenChange={setOpenAdd}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Employee</DialogTitle>
           </DialogHeader>
-              
+
           <AddEmployeeForm
-            onAdd={(emp) => {
+            onAdd={(emp: Employee) => {
               setEmployees((prev) => [...prev, emp]);
               setOpenAdd(false);
             }}
@@ -237,7 +252,6 @@ export default function EmployeeManagement() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Modal */}
       <Dialog open={openEdit} onOpenChange={setOpenEdit}>
         <DialogContent>
           <DialogHeader>
@@ -252,7 +266,7 @@ export default function EmployeeManagement() {
 
               <Input value={selectedEmpData.site} onChange={(e) => setSelectedEmpData({ ...selectedEmpData, site: e.target.value })} />
 
-              <Select value={selectedEmpData.job} onValueChange={(val) => setSelectedEmpData({ ...selectedEmpData, job: val })}>
+              <Select value={selectedEmpData.job} onValueChange={(val) => setSelectedEmpData({ ...selectedEmpData, job: val as "mistree" | "labour" })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -269,6 +283,7 @@ export default function EmployeeManagement() {
           <DialogFooter>
             <Button
               onClick={() => {
+                if (!selectedEmpData) return;
                 setEmployees((prev) => prev.map((emp) => (emp.id === selectedEmpData.id ? selectedEmpData : emp)));
                 setOpenEdit(false);
               }}
@@ -279,7 +294,6 @@ export default function EmployeeManagement() {
         </DialogContent>
       </Dialog>
 
-      {/* Bulk Attendance Modal */}
       <Dialog open={openAttendance} onOpenChange={setOpenAttendance}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>

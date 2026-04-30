@@ -31,15 +31,15 @@ const data = {
         },
         
         {
-          title: "Attendence Records",
+          title: "Employee Records",
           url: "/dashboard/attendence",
           
         },
         
         
         {
-          title: "Employee",
-          url: "/dashboard/",
+          title: "Attendence Records",
+          url: "/dashboard/construction",
           
         },
         {
